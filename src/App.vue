@@ -13,7 +13,11 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 export default {
   name:'app',
-  components:{Header,Footer}
+  components:{Header,Footer},
+  mounted(){
+    // 派发一个action 获取商品分类的三级列表
+    this.$store.dispatch("categoryList");
+  }
 }
 </script>
 
