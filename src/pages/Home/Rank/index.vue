@@ -162,7 +162,7 @@ export default {};
         line-height: 18px;
 
         .img-item {
-          border: 1px solid #e1251b;
+          border: 1px solid #000000;
           width: 269px;
           float: left;
           overflow: hidden;

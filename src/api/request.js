@@ -1,5 +1,8 @@
 // 二次封装axios
 import axios from "axios";
+// 在当前模块中引入store
+import store from "@/store";
+
 // 引入请求进度条
 import nprogress from "nprogress";
 // 引入进度条样式
@@ -22,6 +25,13 @@ const requests = axios.create({
 requests.interceptors.request.use((config)=>{
     // config:配置对象，对象里最重要的就是header请求头
     // 配置进度条开始
+    if(store.state.detail.uuid_token){
+        config.headers.userTempId = store.state.detail.uuid_token;
+    }
+    // 需要携带token带给服务器
+    if(store.state.user.token){
+        config.headers.token = store.state.user.token;
+    }
     nprogress.start();
     return config;
 });

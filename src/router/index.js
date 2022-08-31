@@ -1,4 +1,5 @@
 // 配置路由
+import store from '@/store';
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import routes from './routes'
@@ -32,7 +33,7 @@ VueRouter.prototype.replace = function(location, resolve, reject){
     }
 }
 
-export default new VueRouter({
+let router = new VueRouter({
     // 配置路由
     routes,
     // 滚动行为
@@ -40,4 +41,46 @@ export default new VueRouter({
         // 代表滚动条在最上方
         return{y:0}
     },
+});
+// 全局守卫，前置守卫（在路由跳转之间进行判断）
+router.beforeEach(async (to, from, next)=>{
+    // 用户登录了，才会有token,未登录一定不会有token
+    let token = store.state.user.token;
+    let name = store.state.user.userInfo.name;
+    // 用户已经登录
+    if(token){
+        // 用户已经登录了还想去login是没办法的
+        if(to.path == '/login'){
+            next('/home')
+        }else{
+            // 登录了，去的不是login
+            if(name){
+                next();
+            }else{
+                // 没有用户信息，派发action让仓库存储用户信息在跳转
+                try {
+                    await store.dispatch('getUserInfo');
+                    next();
+                } catch (error) {
+                    // token失效了获取不到用户的信息
+                    // 清除token
+                    await store.dispatch('userLogout');
+                    next('/login');
+                }
+            }
+        }
+    }else{
+        // 未登录,不能去交易相关、支付相关、个人中心相关的页面
+        let toPath = to.path;
+        if(toPath.indexOf('/trade')!==-1 || toPath.indexOf('/pay')!==-1 || toPath.indexOf('/center')!==-1){
+            // 未登录下点击的页面登录后直接跳转
+            next('/login?redirect='+toPath);
+        }else{
+            // 去的不是上面这些路由就放行
+            next();
+        }
+    }
 })
+
+
+export default router;

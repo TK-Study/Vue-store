@@ -5,15 +5,21 @@
       <div class="container">
         <div class="loginList">
           <p>尚品汇欢迎您！</p>
-          <p>
+          <!-- 没有用户名，未登录 -->
+          <p v-if="!userName">
             <span>请</span>
             <router-link to="/login">登录</router-link>
             <router-link class="register" to="/register">免费注册</router-link>
           </p>
+          <!-- 登录了 -->
+          <p v-else>
+            <a>{{userName}}</a>
+            <a class="register" @click="logout">退出登录</a>
+          </p>
         </div>
         <div class="typeList">
-          <a href="###">我的订单</a>
-          <a href="###">我的购物车</a>
+          <router-link to="/center/myorder">我的订单</router-link>
+          <router-link to="/shopcart">我的购物车</router-link>
           <a href="###">我的尚品汇</a>
           <a href="###">尚品汇会员</a>
           <a href="###">企业采购</a>
@@ -27,7 +33,7 @@
     <div class="bottom">
       <h1 class="logoArea">
         <router-link class="logo" to="/home">
-          <img src="./images/logo.png" alt="" />
+          <img src="./images/logo.png" alt=""  width="100px"/>
         </router-link>
       </h1>
       <div class="searchArea">
@@ -79,6 +85,18 @@ export default {
         this.$router.push(loction);
       }
     },
+    // 退出登录
+    async logout(){
+      // 发送请求，通知服务器退出登录【清除token】
+      // 清除项目中数据【userInfo、token】
+      try {
+        // 如果退出登录，回到首页
+        await this.$store.dispatch('userLogout');
+        this.$router.push('/home')
+      } catch (error) {
+        
+      }
+    }
   },
   mounted() {
     // 通过全局事件总线清除关键字
@@ -86,6 +104,12 @@ export default {
       this.keyword = "";
     });
   },
+  computed:{
+    userName(){
+      // 用户名信息
+      return this.$store.state.user.userInfo.name;
+    }
+  }
 };
 </script>
 
@@ -159,7 +183,7 @@ export default {
           height: 32px;
           padding: 0px 4px;
           // 修改搜索框颜色
-          border: 2px solid #ffb6ac;
+          border: 2px solid #000000;
           float: left;
 
           &:focus {
